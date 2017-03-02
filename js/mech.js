@@ -1,18 +1,10 @@
-var game = new Phaser.Game('100', '100', Phaser.AUTO, '');
+var game = new Phaser.Game(800, 600, Phaser.AUTO, '');
 //Recall: p1 & p2 are width and height. Given as strings, they are a percentage value of the browser window.
 //p3: preferred rendering context
 //p4: parent element in the DOM: body if none given
 //p5: state object. This and all following parameters are optional.
 var boot = {
   preload : function(){
-  },
-  init: function(){
-    // scale the game 4x
-    game.scale.scaleMode = Phaser.ScaleManager.USER_SCALE;
-    game.scale.setUserScale(4, 4);
-    // enable crisp rendering
-    game.renderer.renderSession.roundPixels = true;
-    Phaser.Canvas.setImageRenderingCrisp(this.game.canvas)
   },
   create : function(){
     game.state.start('Preflight');
