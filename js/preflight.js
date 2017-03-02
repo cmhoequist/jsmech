@@ -19,6 +19,8 @@ var preflight = {
     radarMech = game.add.sprite(game.world.centerX,game.world.centerY,'mech');
     radarMech.x -= radarMech.width/2;
     radarMech.y -= radarMech.height/2;
+    game.physics.arcade.enable(radarMech);
+    radarMech.body.immovable = true;
 
     //Create radar blips
     blips = game.add.group();
@@ -40,6 +42,9 @@ var preflight = {
     }
   },
   update: function(){
-
+    game.physics.arcade.collide(radarMech,blips,this.radarCollisions,null,this);
+  },
+  radarCollisions : function(mech, blip){
+    blip.kill();
   }
 }
