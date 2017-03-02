@@ -3,12 +3,7 @@ var game = new Phaser.Game('100', '100', Phaser.AUTO, '');
 //p3: preferred rendering context
 //p4: parent element in the DOM: body if none given
 //p5: state object. This and all following parameters are optional.
-
-var boot = function(game){
-  console.log('what does console.log actually do?');
-}
-
-boot.prototype = {
+var boot = {
   preload : function(){
   },
   init: function(){
@@ -18,11 +13,8 @@ boot.prototype = {
     // enable crisp rendering
     game.renderer.renderSession.roundPixels = true;
     Phaser.Canvas.setImageRenderingCrisp(this.game.canvas)
-  }
+  },
   create : function(){
-    game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
-    game.scale.pageAlignHorizontally = true;
-    game.scale.setScreenSize(true);
     game.state.start('Preflight');
   }
 }

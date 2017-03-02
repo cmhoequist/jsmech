@@ -1,15 +1,10 @@
 var hud, blip, radarMech, cursors;
 
-var preflight = function(game){
-}
-
-preflight.prototype = {
-
-
+var preflight = {
   //Member functions declared here
   preload : function(){
     //Note that radar coloring is #14a10c
-      game.load.image('background','assets/reticule2.png');
+      game.load.image('background','assets/reticule5.png');
       game.load.image('blip','assets/radarBlip.png');
       game.load.image('mech','assets/radarCenter.png');
   },
@@ -31,8 +26,6 @@ preflight.prototype = {
     var dy = blip.y - radarMech.y + radarMech.height/2;
     blip.body.velocity.x = dx*dy/dx;
     blip.body.velocity.y = dy*dx/dy;
-    blip.body.gravity.x = 0;
-    blip.body.gravity.y = 0;
 
     //Create cursors
     cursors = game.input.keyboard.createCursorKeys();
