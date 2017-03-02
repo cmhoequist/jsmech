@@ -20,16 +20,18 @@ var preflight = {
     radarMech.x -= radarMech.width/2;
     radarMech.y -= radarMech.height/2;
 
+    //Create radar blips
+    blips = game.add.group();
+    blips.enableBody = true;
     for(var i = 0; i < 3; i++){
       var angle = Math.random()*Math.PI*2;
       var x = game.world.centerX+Math.cos(angle)*circle.diameter/2;
       var y = game.world.centerY+Math.sin(angle)*circle.diameter/2;
-      var sprite = game.add.sprite(x,y);
+      var sprite = blips.create(x,y);
       var gfx = game.add.graphics();
       gfx.lineStyle(1, 0x00ff00, 1);
       gfx.drawCircle(0,0,5); //positioned relative to sprite
       sprite.addChild(gfx);
-      game.physics.arcade.enable(sprite);
 
       var dx = x-game.world.centerX;
       var dy = y-game.world.centerY;
