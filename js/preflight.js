@@ -1,6 +1,6 @@
 var hud, blips, radarMech, cursors;
 var circle, radius;
-
+var cx, cy;
 var preflight = {
   //Member functions declared here
   preload : function(){
@@ -9,19 +9,20 @@ var preflight = {
     game.load.image('mech','assets/radarCenter.png');
   },
   create : function(){
-    //Create HUD elements
-    circle = new Phaser.Circle(game.world.centerX,game.world.centerY,300);
+    cx = game.world.centerX;
+    cy = game.world.centerY;
+
+    //Create radar HUD component
+    circle = new Phaser.Circle(cx, cy,300);
     radius = circle.diameter/2;
     var graphics = game.add.graphics(0, 0);
     graphics.lineStyle(1, 0x00ff00, 1);
     graphics.drawCircle(circle.x, circle.y, circle.diameter);
-
-    radarMech = game.add.sprite(game.world.centerX,game.world.centerY,'mech');
+    radarMech = game.add.sprite(cx, cy,'mech');
     radarMech.x -= radarMech.width/2;
     radarMech.y -= radarMech.height/2;
     game.physics.arcade.enable(radarMech);
     radarMech.body.immovable = true;
-
     //Create radar blips
     blips = game.add.group();
     blips.enableBody = true;
@@ -29,6 +30,32 @@ var preflight = {
       this.spawnBlip();
     }
 
+    //Create arc boundaries for remaining HUD components
+    var r2 = circle.diameter/2+25;
+    var offset = 10;
+    var radx = [Phaser.Math.degToRad(offset), Phaser.Math.degToRad(180-offset), Phaser.Math.degToRad(180+offset), Phaser.Math.degToRad(360-offset)];
+    var rady = [Phaser.Math.degToRad(90-offset), Phaser.Math.degToRad(90+offset), Phaser.Math.degToRad(270-offset), Phaser.Math.degToRad(270+offset)]
+    graphics.arc(cx, cy, r2, radx[0], rady[0], false);     //origin x, origin y, arc radius, start angle (rad), end angle (rad), draw counterclockwise bool
+    graphics.arc(cx, cy, r2, rady[1], radx[1], false);
+    graphics.arc(cx, cy, r2, radx[2], rady[2], false);
+    graphics.arc(cx, cy, r2, rady[3], radx[3], false);
+    //Draw line boundaries for remaining HUD components
+    for(var i = 0; i < radx.length; i++){
+      var x = cx+Math.cos(radx[i])*r2;
+      var y = cy+Math.sin(radx[i])*r2;
+      graphics.moveTo(x,y);
+      graphics.lineTo(x < cx ? 20 : game.world.width-20, y); //lines running orthogonal to world bounds (horizontal)
+      graphics.lineTo(x < cx ? 20 : game.world.width-20, y < cy ? 20 : game.world.height - 20); //lines running parallel to world bounds (vertical)
+    }
+    for(var i = 0; i < rady.length; i++){
+      var x = cx+Math.cos(rady[i])*r2;
+      var y = cy+Math.sin(rady[i])*r2;
+      graphics.moveTo(x, y);
+      graphics.lineTo(x, y < cy ? 20 : game.world.height - 20);  //lines running orthogonal to world bounds (vertical)
+      graphics.lineTo(x < cx ? 20 : game.world.width-20, y < cy ? 20 : game.world.height - 20); //lines running parallel to world bounds (horizontal)
+    }
+
+    //Arrow key inputs
     cursors = game.input.keyboard.createCursorKeys();
   },
   update: function(){
@@ -76,14 +103,14 @@ var preflight = {
   spawnBlip : function(){
     var blip = blips.getFirstExists(false);
     var angle = Math.random()*Math.PI*2;
-    var x = game.world.centerX+Math.cos(angle)*circle.diameter/2;
-    var y = game.world.centerY+Math.sin(angle)*circle.diameter/2;
-    var dx = x-game.world.centerX;
-    var dy = y-game.world.centerY;
+    var x = cx+Math.cos(angle)*circle.diameter/2;
+    var y = cy+Math.sin(angle)*circle.diameter/2;
+    var dx = x-cx;
+    var dy = y-cy;
     var speedFudge = Math.random()*(0.75 - 0.35)+0.35;
     var vx = -speedFudge*dx;
     var vy = -speedFudge*dy;
-    var spd = vx*vx + vy*vy;
+    var spd = Math.sqrt(vx*vx + vy*vy);
 
     if(blips.children.length < 3){
       //Draw radar blip
@@ -108,8 +135,8 @@ var preflight = {
       blip.x = x;
       blip.y = y;
       respectBounds(blip);
-      blip.body.velocity.x = -speedFudge*dx;
-      blip.body.velocity.y = -speedFudge*dy;
+      blip.body.velocity.x = vx;
+      blip.body.velocity.y = vy;
       blip.revive();
       var tx = blip.children[0];
       tx.setText(Math.floor(spd).toString());
