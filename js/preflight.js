@@ -44,7 +44,6 @@ var preflight = {
         }
     }
     while(hitList.length > 0){
-    //   blips.remove(blips.children[hitList.pop()]);
       blips.children[hitList.pop()].kill();
       this.spawnBlip();
     }
@@ -69,7 +68,6 @@ var preflight = {
         dot.body.velocity.y -= 1;
       });
     }
-
   },
   radarCollisions : function(mech, blip){
     blip.kill();
@@ -83,39 +81,57 @@ var preflight = {
     var dx = x-game.world.centerX;
     var dy = y-game.world.centerY;
     var speedFudge = Math.random()*(0.75 - 0.35)+0.35;
+    var vx = -speedFudge*dx;
+    var vy = -speedFudge*dy;
+    var spd = vx*vx + vy*vy;
 
     if(blips.children.length < 3){
+      //Draw radar blip
       var gfx = game.add.graphics();
       gfx.lineStyle(1, 0xff0000, 1);
       gfx.drawCircle(0,0,5); //positioned relative to sprite
       var sprite = blips.create(x,y,gfx.generateTexture());
-      sprite.x -= sprite.width/2;
-      sprite.y -= sprite.height/2;
-      if(sprite.x < circle.x){
-        sprite.x += sprite.width/2;
-      }
-      else if(sprite.x > circle.x){
-        sprite.x -= sprite.width/2;
-      }
-      if(sprite.y < circle.y){
-        sprite.y += sprite.height/2;
-      }
-      else if(sprite.y > circle.y){
-        sprite.y -= sprite.height/2;
-      }
+      //Position speed text beneath radar blip
+      var style = { font: '12px courier', fill: '#ffffff'};
+      var text = game.add.text(0,0, Math.floor(spd).toString(), style);
+      text.x = sprite.width/2 - text.width/2;
+      text.y += sprite.height/2;
+      sprite.addChild(text);
       gfx.destroy();
-      sprite.body.velocity.x = -speedFudge*dx;
-      sprite.body.velocity.y = -speedFudge*dy;
+      //Adjust blip positioning around circumference of radar
+      respectBounds(sprite);
+      //Actualize blip speed
+      sprite.body.velocity.x = vx;
+      sprite.body.velocity.y = vy;
     }
-    else{
-      blip.body.velocity.x = -speedFudge*dx;
-      blip.body.velocity.y = -speedFudge*dy;
+    else if (blip !== null){
       blip.x = x;
       blip.y = y;
+      respectBounds(blip);
+      blip.body.velocity.x = -speedFudge*dx;
+      blip.body.velocity.y = -speedFudge*dy;
       blip.revive();
+      var tx = blip.children[0];
+      tx.setText(Math.floor(spd).toString());
+      tx.x = blip.width/2 - tx.width/2;
     }
   },
   render : function(){
     game.debug.spriteInfo(radarMech, 32, 32);
+  }
+}
+
+function respectBounds(sprite){
+  if(sprite.x < circle.x){
+    sprite.x += sprite.width/2;
+  }
+  else if(sprite.x > circle.x){
+    sprite.x -= sprite.width/2;
+  }
+  if(sprite.y < circle.y){
+    sprite.y += sprite.height/2;
+  }
+  else if(sprite.y > circle.y){
+    sprite.y -= sprite.height/2;
   }
 }
