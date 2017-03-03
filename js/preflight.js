@@ -17,7 +17,7 @@ var preflight = {
     graphics.lineStyle(1, 0x00ff00, 1);
 
     //Create arc boundaries for HUD components
-    circle = new Phaser.Circle(cx, cy,300);
+    circle = new Phaser.Circle(cx, cy, game.height/2);
     radius = circle.diameter/2;
     graphics.drawCircle(circle.x, circle.y, circle.diameter);
     var r2 = radius+25;
@@ -71,11 +71,9 @@ var preflight = {
     var y1 = 20;
     var rangefinderx = (x0+x1)/2;
     var rangefindery = (y0+y1)/2;
-    var rangefinderradius = 60;
+    var rangefinderradius = Math.min(0.8*(x1-x0),0.8*(y0-y1))/2;
     graphics.drawCircle(rangefinderx, rangefindery, rangefinderradius*2);
-    rangefinderMech = game.add.sprite(rangefinderx, rangefindery, 'mech');
-    rangefinderMech.x -= rangefinderMech.width/2;
-    rangefinderMech.y -= rangefinderMech.height/2;
+    rangefinderMech = new PlayerMech(game, rangefinderx, rangefindery, 'mech');
     rfEnemies = game.add.group();
     rfEnemies.enableBody = true;
     for(var i = 0; i < 3; i++){
@@ -107,7 +105,7 @@ var preflight = {
     }
 
     //Handle user input
-    userInput(blips);
+    userInput();
   },
   spawnRangefinderEnemy : function(rfx,rfy,r){
     var angle = 0;
@@ -115,7 +113,7 @@ var preflight = {
     var y = rfy+Math.sin(angle)*r;
     var h = 10;
     var graphics = game.add.graphics(x,y);
-    graphics.lineStyle(4,0xffdf00,1);
+    graphics.lineStyle(4,0xffffff,1);
     graphics.lineTo(Math.cos(angle)*h,Math.sin(angle)*h);
     // var sprite = rfEnemies.create(x,y,graphics.generateTexture());
     var circle = {x: rfx, y: rfy, radius: r};
@@ -189,23 +187,27 @@ function respectBounds(sprite){
   }
 }
 
-function userInput(blips){
+function userInput(){
   if(cursors.left.isDown){
+    rangefinderMech.logicalMove(-rangefinderMech.accPerTick, 0);
     blips.forEach(function(dot){
       dot.body.velocity.x += 1;
     });
   }
   else if(cursors.right.isDown){
+    rangefinderMech.logicalMove(rangefinderMech.accPerTick, 0);
     blips.forEach(function(dot){
       dot.body.velocity.x -= 1;
     });
   }
   else if(cursors.up.isDown){
+    rangefinderMech.logicalMove(0, -rangefinderMech.accPerTick);
     blips.forEach(function(dot){
       dot.body.velocity.y += 1;
     });
   }
   else if(cursors.down.isDown){
+    rangefinderMech.logicalMove(0, rangefinderMech.accPerTick);
     blips.forEach(function(dot){
       dot.body.velocity.y -= 1;
     });

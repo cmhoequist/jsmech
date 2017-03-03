@@ -1,4 +1,4 @@
-var game = new Phaser.Game(800, 600, Phaser.AUTO, '');
+var game = new Phaser.Game(1200, 800, Phaser.AUTO, '');
 //Recall: p1 & p2 are width and height. Given as strings, they are a percentage value of the browser window.
 //p3: preferred rendering context
 //p4: parent element in the DOM: body if none given
