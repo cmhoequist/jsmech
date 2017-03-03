@@ -1,6 +1,9 @@
 var hud, blips, radarMech, cursors;
 var circle, radius;
 var cx, cy;
+
+var maskedLayer;
+
 var preflight = {
   //Member functions declared here
   preload : function(){
@@ -11,6 +14,8 @@ var preflight = {
   create : function(){
     cx = game.world.centerX;
     cy = game.world.centerY;
+    maskedLayer = game.add.group();
+    facadeLayer = game.add.group();
 
     //Create radar HUD component
     circle = new Phaser.Circle(cx, cy,300);
@@ -29,6 +34,13 @@ var preflight = {
     for(var i = 0; i < 3; i++){
       this.spawnBlip();
     }
+    maskedLayer.add(blips);
+    //Mask radar blips (lets us cut corners on pixel-perfect radar bounds collision detection)
+    var mask = game.add.graphics(0, 0);
+    mask.beginFill(0xffffff);
+    mask.drawCircle(circle.x, circle.y, circle.diameter+1.5);
+    mask.endFill();
+    maskedLayer.mask = mask;
 
     //Create arc boundaries for remaining HUD components
     var r2 = circle.diameter/2+25;
@@ -55,46 +67,31 @@ var preflight = {
       graphics.lineTo(x < cx ? 20 : game.world.width-20, y < cy ? 20 : game.world.height - 20); //lines running parallel to world bounds (horizontal)
     }
 
+
+    //
+    // //	As you move the mouse / touch, the circle will track the sprite
+    // game.input.addMoveCallback(move, this);
+
     //Arrow key inputs
     cursors = game.input.keyboard.createCursorKeys();
   },
   update: function(){
+    //Kill radar blips that overlap with the figure in the center (mech)
     game.physics.arcade.overlap(radarMech,blips,this.radarCollisions,null,this);
-
-    var hitList = [];
+    //Kill radar blips that go out of bounds and replace with new blip
     for(var i = 0; i < blips.children.length; i++){
-        var dx = blips.children[i].x - circle.x;
-        var dy = blips.children[i].y - circle.y;
-        var dist = dx*dx + dy*dy;
-        if(dist >= radius*radius){
-          hitList.push(i);
-        }
+      var currentBlip = blips.children[i];
+      var dx = currentBlip.x - circle.x;
+      var dy = currentBlip.y - circle.y;
+      var dist = dx*dx + dy*dy;
+      var fatDist = (dx+currentBlip.width)*(dx+currentBlip.width) + (dy+currentBlip.height)*(dy+currentBlip.height);
+      if( dist >= radius*radius){
+        currentBlip.kill();
+        this.spawnBlip();
+      }
     }
-    while(hitList.length > 0){
-      blips.children[hitList.pop()].kill();
-      this.spawnBlip();
-    }
-
-    if(cursors.left.isDown){
-      blips.forEach(function(dot){
-        dot.body.velocity.x += 1;
-      });
-    }
-    else if(cursors.right.isDown){
-      blips.forEach(function(dot){
-        dot.body.velocity.x -= 1;
-      });
-    }
-    else if(cursors.up.isDown){
-      blips.forEach(function(dot){
-        dot.body.velocity.y += 1;
-      });
-    }
-    else if(cursors.down.isDown){
-      blips.forEach(function(dot){
-        dot.body.velocity.y -= 1;
-      });
-    }
+    //Handle user input
+    userInput(blips);
   },
   radarCollisions : function(mech, blip){
     blip.kill();
@@ -160,5 +157,28 @@ function respectBounds(sprite){
   }
   else if(sprite.y > circle.y){
     sprite.y -= sprite.height/2;
+  }
+}
+
+function userInput(blips){
+  if(cursors.left.isDown){
+    blips.forEach(function(dot){
+      dot.body.velocity.x += 1;
+    });
+  }
+  else if(cursors.right.isDown){
+    blips.forEach(function(dot){
+      dot.body.velocity.x -= 1;
+    });
+  }
+  else if(cursors.up.isDown){
+    blips.forEach(function(dot){
+      dot.body.velocity.y += 1;
+    });
+  }
+  else if(cursors.down.isDown){
+    blips.forEach(function(dot){
+      dot.body.velocity.y -= 1;
+    });
   }
 }
