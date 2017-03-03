@@ -1,4 +1,4 @@
-var blips, radarMech, cursors, rfEnemies;
+var blips, radarMech, rangefinderMech, cursors, rfEnemies;
 var circle, radius;
 var cx, cy;
 var maskedLayer;
@@ -73,7 +73,7 @@ var preflight = {
     var rangefindery = (y0+y1)/2;
     var rangefinderradius = 60;
     graphics.drawCircle(rangefinderx, rangefindery, rangefinderradius*2);
-    var rangefinderMech = game.add.sprite(rangefinderx, rangefindery, 'mech');
+    rangefinderMech = game.add.sprite(rangefinderx, rangefindery, 'mech');
     rangefinderMech.x -= rangefinderMech.width/2;
     rangefinderMech.y -= rangefinderMech.height/2;
     rfEnemies = game.add.group();
@@ -103,7 +103,7 @@ var preflight = {
 
     //Update rangefinder
     for(var i = 0; i < rfEnemies.children.length; i++){
-      rfEnemies.children[i].increment(game);
+      rfEnemies.children[i].increment(game, rangefinderMech);
     }
 
     //Handle user input
