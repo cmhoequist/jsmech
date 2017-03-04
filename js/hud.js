@@ -70,7 +70,7 @@ var hud = {
     var rangefindery = (y0+y1)/2;
     var rangefinderradius = Math.min(0.8*(x1-x0),0.8*(y0-y1))/2;
     graphics.drawCircle(rangefinderx, rangefindery, rangefinderradius*2);
-    rangefinderMech = new PlayerMech(game, rangefinderx, rangefindery, 'mech');
+    rangefinderMech = new VirtualPhysicsObject(game, rangefinderx, rangefindery, 'mech');
     rfEnemies = game.add.group();
     rfEnemies.enableBody = true;
     for(var i = 0; i < 3; i++){
@@ -189,25 +189,25 @@ function respectBounds(sprite){
 
 function userInput(){
   if(cursors.left.isDown){
-    rangefinderMech.logicalMove(-rangefinderMech.accPerTick, 0);
+    rangefinderMech.updateAcc(-rangefinderMech.virtualEngineAcc, 0);
     blips.forEach(function(dot){
       dot.body.velocity.x += 1;
     });
   }
   else if(cursors.right.isDown){
-    rangefinderMech.logicalMove(rangefinderMech.accPerTick, 0);
+    rangefinderMech.updateAcc(rangefinderMech.virtualEngineAcc, 0);
     blips.forEach(function(dot){
       dot.body.velocity.x -= 1;
     });
   }
   else if(cursors.up.isDown){
-    rangefinderMech.logicalMove(0, -rangefinderMech.accPerTick);
+    rangefinderMech.updateAcc(0, -rangefinderMech.virtualEngineAcc);
     blips.forEach(function(dot){
       dot.body.velocity.y += 1;
     });
   }
   else if(cursors.down.isDown){
-    rangefinderMech.logicalMove(0, rangefinderMech.accPerTick);
+    rangefinderMech.updateAcc(0, rangefinderMech.virtualEngineAcc);
     blips.forEach(function(dot){
       dot.body.velocity.y -= 1;
     });

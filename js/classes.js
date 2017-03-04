@@ -3,15 +3,16 @@ RFEnemy = function(game, x, y, texture, circle){
   Phaser.Sprite.call(this, game, x, y, texture);
   game.add.existing(this);
 
-  //HUD positioning
+  //Rangefinder (HUD) positioning
   this.cx = circle.x;
   this.cy = circle.y;
   this.r = circle.radius;
   this.referenceAngle = Math.random()*(2*Math.PI);
   this.speed = (0-Math.round(Math.random()))*Math.random() * (2 - 0.5) + 0.5;
   this.angle = 0;
+  //Text positioning
 
-  //Logical tracking
+  //Virtual physics
   this.enemyX = game.world.randomX;
   this.enemyY = game.world.randomY;
   this.distance;
@@ -62,39 +63,12 @@ RFEnemy = function(game, x, y, texture, circle){
     var yarr = [mech.y, this.y];
     this.text.x = Phaser.Math.linearInterpolation(xarr, 0.8);
     this.text.y = Phaser.Math.linearInterpolation(yarr, 0.8);
-    this.mechcx = mech.logicalx;
-    this.mechcy = mech.logicaly;
-    this.updateDistance(mech.logicalx, mech.logicaly);
+    this.mechcx = mech.virtualPos.x;
+    this.mechcy = mech.virtualPos.y;
+    this.updateDistance(mech.virtualPos.x, mech.virtualPos.y);
     this.fire(hud);
   }
 };
 
 RFEnemy.prototype = Object.create(Phaser.Sprite.prototype);
 RFEnemy.prototype.constructor = RFEnemy;
-
-
-
-
-PlayerMech = function(game, x, y, texture){
-  this.logicalx = x;
-  this.logicaly = y;
-  this.accPerTick = 1;
-  this.vx = 0;
-  this.vy = 0;
-
-  Phaser.Sprite.call(this, game, x, y, texture);
-  game.add.existing(this);
-
-  this.anchor.x = 0.5;
-  this.anchor.y = 0.5;
-
-  this.logicalMove = function(ax, ay){
-    this.vx += ax;
-    this.vy += ay;
-    this.logicalx += this.vx;
-    this.logicaly += this.vy;
-  }
-}
-
-PlayerMech.prototype = Object.create(Phaser.Sprite.prototype);
-PlayerMech.prototype.constructor = PlayerMech;
