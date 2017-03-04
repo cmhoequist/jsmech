@@ -33,7 +33,6 @@ RFEnemy = function(game, x, y, texture, circle){
   this.fire = function(hud){
     var currentTime = new Date().getTime();
     this.timeElapsed = currentTime - this.startTime;
-    console.log(this.timeElapsed);
     if(this.timeElapsed > this.reloadDelay){
       this.startTime = currentTime;
       hud.spawnBlip(this.referenceAngle);
@@ -72,6 +71,9 @@ RFEnemy = function(game, x, y, texture, circle){
 
 RFEnemy.prototype = Object.create(Phaser.Sprite.prototype);
 RFEnemy.prototype.constructor = RFEnemy;
+
+
+
 
 PlayerMech = function(game, x, y, texture){
   this.logicalx = x;

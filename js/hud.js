@@ -3,7 +3,7 @@ var circle, radius;
 var cx, cy;
 var maskedLayer;
 
-var preflight = {
+var hud = {
   preload : function(){
     game.load.image('blip','assets/radarBlip.png');
     game.load.image('mech','assets/radarCenter.png');
@@ -118,6 +118,10 @@ var preflight = {
   },
   radarCollisions : function(mech, blip){
     blip.kill();
+    game.state.start('Gameover', true, false);
+    //p1: state to start
+    //p2: clearWorld: default is true, clears World display list (not Stage display list)
+    //p3: clearCache: default is false, clears all loaded assets
   },
   spawnBlip : function(spawnAngle){
     var missile = blips.getFirstExists(false);
