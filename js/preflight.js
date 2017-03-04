@@ -53,9 +53,6 @@ var preflight = {
     //Create radar blips
     blips = game.add.group();
     blips.enableBody = true;
-    for(var i = 0; i < 3; i++){
-      this.spawnBlip();
-    }
     maskedLayer.add(blips);
     //Mask radar blips (lets us cut corners on pixel-perfect radar bounds collision detection)
     var mask = game.add.graphics(0, 0);
@@ -95,13 +92,12 @@ var preflight = {
       var fatDist = (dx+currentBlip.width)*(dx+currentBlip.width) + (dy+currentBlip.height)*(dy+currentBlip.height);
       if( dist >= radius*radius){
         currentBlip.kill();
-        this.spawnBlip();
       }
     }
 
     //Update rangefinder
     for(var i = 0; i < rfEnemies.children.length; i++){
-      rfEnemies.children[i].increment(game, rangefinderMech);
+      rfEnemies.children[i].increment(game, rangefinderMech, this);
     }
 
     //Handle user input
@@ -122,13 +118,13 @@ var preflight = {
   },
   radarCollisions : function(mech, blip){
     blip.kill();
-    this.spawnBlip();
   },
-  spawnBlip : function(){
-    var blip = blips.getFirstExists(false);
-    var angle = Math.random()*Math.PI*2;
-    var x = cx+Math.cos(angle)*radius;
-    var y = cy+Math.sin(angle)*radius;
+  spawnBlip : function(spawnAngle){
+    var missile = blips.getFirstExists(false);
+    //Set position (determined by position of enemy relative to mech)
+    var x = cx+Math.cos(spawnAngle)*radius;
+    var y = cy+Math.sin(spawnAngle)*radius;
+    //Set semirandom speed
     var dx = x-cx;
     var dy = y-cy;
     var speedFudge = Math.random()*(0.75 - 0.35)+0.35;
@@ -136,35 +132,35 @@ var preflight = {
     var vy = -speedFudge*dy;
     var spd = Math.sqrt(vx*vx + vy*vy);
 
-    if(blips.children.length < 3){
-      //Draw radar blip
+    if(missile === null){
+      //Draw blip
       var gfx = game.add.graphics();
       gfx.lineStyle(1, 0xff0000, 1);
       gfx.drawCircle(0,0,5); //positioned relative to sprite
-      var sprite = blips.create(x,y,gfx.generateTexture());
+      missile = blips.create(x, y, gfx.generateTexture());
+      gfx.destroy();
       //Position speed text beneath radar blip
       var style = { font: '12px courier', fill: '#ffffff'};
       var text = game.add.text(0,0, Math.floor(spd).toString(), style);
-      text.x = sprite.width/2 - text.width/2;
-      text.y += sprite.height/2;
-      sprite.addChild(text);
-      gfx.destroy();
+      text.x = missile.width/2 - text.width/2;
+      text.y += missile.height/2;
+      missile.addChild(text);
       //Adjust blip positioning around circumference of radar
-      respectBounds(sprite);
+      respectBounds(missile);
       //Actualize blip speed
-      sprite.body.velocity.x = vx;
-      sprite.body.velocity.y = vy;
+      missile.body.velocity.x = vx;
+      missile.body.velocity.y = vy;
     }
-    else if (blip !== null){
-      blip.x = x;
-      blip.y = y;
-      respectBounds(blip);
-      blip.body.velocity.x = vx;
-      blip.body.velocity.y = vy;
-      blip.revive();
-      var tx = blip.children[0];
+    else{
+      missile.x = x;
+      missile.y = y;
+      respectBounds(missile);
+      missile.body.velocity.x = vx;
+      missile.body.velocity.y = vy;
+      missile.revive();
+      var tx = missile.children[0];
       tx.setText(Math.floor(spd).toString());
-      tx.x = blip.width/2 - tx.width/2;
+      tx.x = missile.width/2 - tx.width/2;
     }
   },
   render : function(){

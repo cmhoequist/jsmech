@@ -9,6 +9,7 @@ RFEnemy = function(game, x, y, texture, circle){
   this.r = circle.radius;
   this.referenceAngle = Math.random()*(2*Math.PI);
   this.speed = (0-Math.round(Math.random()))*Math.random() * (2 - 0.5) + 0.5;
+  this.angle = 0;
 
   //Logical tracking
   this.enemyX = game.world.randomX;
@@ -23,6 +24,21 @@ RFEnemy = function(game, x, y, texture, circle){
   this.mechcx = 0;
   this.mechcy = 0;
 
+  //Firing
+  this.startTime = new Date().getTime();
+  this.timeElapsed = 0;
+  this.reloadDelay = 2000;
+
+  //Fire
+  this.fire = function(hud){
+    var currentTime = new Date().getTime();
+    this.timeElapsed = currentTime - this.startTime;
+    console.log(this.timeElapsed);
+    if(this.timeElapsed > this.reloadDelay){
+      this.startTime = currentTime;
+      hud.spawnBlip(this.referenceAngle);
+    }
+  }
   //Tracking display update function
   this.updateDistance = function(mechCx, mechCy){
     var xdif = this.enemyX - mechCx;
@@ -35,7 +51,7 @@ RFEnemy = function(game, x, y, texture, circle){
     this.tint = c;
   }
   //HUD position update function
-  this.increment = function(game, mech){
+  this.increment = function(game, mech, hud){
 /*TODO; implement enemy AI. Markers are just wandering around in circles as proof of concept.*/
     this.referenceAngle += game.time.physicsElapsed * this.speed;
     this.referenceAngle = this.referenceAngle % (2*Math.PI); //don't want indefinitely increasing angle
@@ -50,6 +66,7 @@ RFEnemy = function(game, x, y, texture, circle){
     this.mechcx = mech.logicalx;
     this.mechcy = mech.logicaly;
     this.updateDistance(mech.logicalx, mech.logicaly);
+    this.fire(hud);
   }
 };
 
