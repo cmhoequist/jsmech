@@ -1,5 +1,5 @@
-var blips, playerMech, rangefinderMech, cursors, rfEnemies, enemyMechs;
-var radarComponent, radius;
+ var blips, radarMech, rangefinderMech, cursors, rfEnemies, enemyMechs;
+var radarComponent, radarRadius;
 var cx, cy;
 var maskedLayer;
 
@@ -23,9 +23,9 @@ var hud = {
 
     //Create arc boundaries for HUD components
     radarComponent = new Phaser.Circle(cx, cy, game.height/2);
-    radius = radarComponent.diameter/2;
+    radarRadius = radarComponent.diameter/2;
     graphics.drawCircle(radarComponent.x, radarComponent.y, radarComponent.diameter);
-    var r2 = radius+25;
+    var r2 = radarRadius+25;
     var offset = 10;
     var radx = [Phaser.Math.degToRad(offset), Phaser.Math.degToRad(180-offset), Phaser.Math.degToRad(180+offset), Phaser.Math.degToRad(360-offset)];
     var rady = [Phaser.Math.degToRad(90-offset), Phaser.Math.degToRad(90+offset), Phaser.Math.degToRad(270-offset), Phaser.Math.degToRad(270+offset)]
@@ -50,11 +50,11 @@ var hud = {
     }
 
     //Create radar HUD component
-    playerMech = game.add.sprite(cx, cy,'mech');
-    playerMech.x -= playerMech.width/2;
-    playerMech.y -= playerMech.height/2;
-    game.physics.arcade.enable(playerMech);
-    playerMech.body.immovable = true;
+    radarMech = game.add.sprite(cx, cy,'mech');
+    radarMech.x -= radarMech.width/2;
+    radarMech.y -= radarMech.height/2;
+    game.physics.arcade.enable(radarMech);
+    radarMech.body.immovable = true;
     //Create radar blips
 
 
@@ -86,7 +86,7 @@ var hud = {
   },
   update: function(){
     //Kill radar blips that overlap with the figure in the center (mech)
-    game.physics.arcade.overlap(playerMech,blips,this.radarCollisions,null,this);
+    game.physics.arcade.overlap(radarMech,blips,this.radarCollisions,null,this);
     //Kill radar blips that go out of bounds and replace with new blip
     for(var i = 0; i < blips.children.length; i++){
       var currentBlip = blips.children[i];
@@ -94,7 +94,7 @@ var hud = {
       var dy = currentBlip.y - radarComponent.y;
       var dist = dx*dx + dy*dy;
       var fatDist = (dx+currentBlip.width)*(dx+currentBlip.width) + (dy+currentBlip.height)*(dy+currentBlip.height);
-      if( dist >= radius*radius){
+      if( dist >= radarRadius*radarRadius){
         currentBlip.kill();
       }
     }
@@ -130,8 +130,8 @@ var hud = {
   spawnBlip : function(spawnAngle){
     var missile = blips.getFirstExists(false);
     //Set position (determined by position of enemy relative to mech)
-    var x = cx+Math.cos(spawnAngle)*radius;
-    var y = cy+Math.sin(spawnAngle)*radius;
+    var x = cx+Math.cos(spawnAngle)*radarRadius;
+    var y = cy+Math.sin(spawnAngle)*radarRadius;
     //Set semirandom speed
     var dx = x-cx;
     var dy = y-cy;
@@ -172,7 +172,7 @@ var hud = {
     }
   },
   render : function(){
-    game.debug.spriteInfo(playerMech, 32, 32);
+    game.debug.spriteInfo(radarMech, 32, 32);
   }
 }
 

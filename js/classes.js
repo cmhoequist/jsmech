@@ -24,7 +24,6 @@ RFEnemy = function(game, x, y, texture, circle){
   this.maxTextScale = 4;
   this.minTextScale = 1;
 
-
   //Firing missiles
   this.startTime = new Date().getTime();
   this.timeElapsed = 0;
@@ -36,7 +35,61 @@ RFEnemy = function(game, x, y, texture, circle){
     this.timeElapsed = currentTime - this.startTime;
     if(this.timeElapsed > this.reloadDelay){
       this.startTime = currentTime;
-      hud.spawnBlip(this.referenceAngle);
+      // hud.spawnBlip(this.referenceAngle);
+      var spawnAngle = this.referenceAngle;
+
+
+      //Spawn blip
+      var missile = blips.getFirstExists(false);
+      //Set position (determined by position of enemy relative to mech)
+      if(this.mech === null){
+        var x = cx+Math.cos(spawnAngle)*radarRadius;
+        var y = cy+Math.sin(spawnAngle)*radarRadius;
+      }
+      else{
+        var x = this.mech.x;
+        var y = this.mech.y;
+      }
+      //Set semirandom speed
+      var dx = x-cx;
+      var dy = y-cy;
+      var speedFudge = Math.random()*(0.75 - 0.35)+0.35;
+      var vx = -speedFudge*dx;
+      var vy = -speedFudge*dy;
+      var spd = Math.sqrt(vx*vx + vy*vy);
+
+      if(missile === null){
+        //Draw blip
+        var gfx = game.add.graphics(0, 0);
+        gfx.lineStyle(1, 0xff0000, 1);
+        gfx.drawCircle(0,0,5); //positioned relative to sprite
+        missile = new Missile(game, x, y, gfx.generateTexture());//blips.create(x, y, gfx.generateTexture());
+        blips.add(missile);
+        gfx.destroy();
+        //Position speed text beneath radar blip
+        var style = { font: '12px courier', fill: '#ffffff'};
+        var text = game.add.text(0,0, Math.floor(spd).toString(), style);
+        text.x = missile.width/2 - text.width/2;
+        text.y += missile.height/2;
+        missile.addChild(text);
+        //Adjust blip positioning around circumference of radar
+        respectBounds(missile);
+        //Actualize blip speed
+        missile.body.velocity.x = vx;
+        missile.body.velocity.y = vy;
+      }
+      else{
+        missile.x = x;
+        missile.y = y;
+        respectBounds(missile);
+        missile.body.velocity.x = vx;
+        missile.body.velocity.y = vy;
+        missile.revive();
+        var tx = missile.children[0];
+        tx.setText(Math.floor(spd).toString());
+        tx.x = missile.width/2 - tx.width/2;
+      }
+
     }
   }
 
@@ -116,3 +169,15 @@ RFEnemy = function(game, x, y, texture, circle){
 
 RFEnemy.prototype = Object.create(VirtualPhysicsObject.prototype);
 RFEnemy.prototype.constructor = RFEnemy;
+
+PlayerMech = function(game, x, y, texture){
+  //Inheritance
+  VirtualPhysicsObject.call(this, game, x, y, texture);
+
+  //Overriden virtual physics
+  this.virtualMaxVel = 2;
+
+}
+
+PlayerMech.prototype = Object.create(VirtualPhysicsObject.prototype);
+PlayerMech.prototype.constructor = PlayerMech;

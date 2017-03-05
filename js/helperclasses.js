@@ -12,7 +12,7 @@ VirtualPhysicsObject = function(game, x, y, texture){
   this.virtualVel = {x: 0, y: 0};
   this.virtualAcc = {x: 0, y: 0};
   this.virtualEngineAcc = 1;
-  this.virtualDrag = 0.2*this.virtualEngineAcc;
+  this.virtualDragCoeff = 0.2;
   this.virtualMaxVel = 1; //13 in meters per second, theoretically
   this.mechVirtualX = 0;
   this.mechVirtualY = 0;
@@ -28,7 +28,7 @@ VirtualPhysicsObject = function(game, x, y, texture){
   this.move = function(){
     var delta = 0;
     for(var attr in this.virtualPos){ //classical physics fields (x,v,a) all have the same attributes (x-coord, y-coord)
-      delta += this.virtualVel[attr] > 0 ? -this.virtualDrag : this.virtualVel[attr] < 0 ? this.virtualDrag : 0; //apply drag if there is motion
+      delta += -this.virtualVel[attr]*this.virtualDragCoeff; //apply drag in opposite direction of motion
       delta += this.virtualAcc[attr];
       this.virtualVel[attr] += delta; //update velocity
       if(this.virtualVel[attr] < -this.virtualMaxVel){ //cap at max speed
@@ -47,13 +47,11 @@ VirtualPhysicsObject = function(game, x, y, texture){
   this.directedMove = function(direction){
     this.virtualAcc.x = Math.cos(direction)*this.virtualEngineAcc;
     this.virtualAcc.y = Math.sin(direction)*this.virtualEngineAcc;
-    console.log(this.virtualAcc.x+', '+this.virtualAcc.y);
     this.move();
   }
 
   //Directed movement given target coordinates
   this.moveToward = function(x , y){
-    console.log('going');
     var xdif = x - this.virtualPos.x;
     var ydif = y - this.virtualPos.y;
     var angle = Math.atan2(ydif, xdif); // range (-PI, PI]
