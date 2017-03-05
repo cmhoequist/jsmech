@@ -21,7 +21,7 @@ RFEnemy = function(game, x, y, texture, circle){
   this.text.anchor.y = 0.5;
   this.effectiveRange = 8000;
   this.defaultFontSize = 12;
-  this.maxTextScale = 2;
+  this.maxTextScale = 4;
   this.minTextScale = 1;
 
 
@@ -70,13 +70,14 @@ RFEnemy = function(game, x, y, texture, circle){
   }
   //HUD position update function
   this.increment = function(game, mech, hud){
+    this.moveToward(mech.virtualPos.x, mech.virtualPos.y);
     this.updateDistance(mech.virtualPos.x, mech.virtualPos.y); //must be called first to correctly update reference angle
     this.x = this.cx + Math.cos(this.referenceAngle) * this.r;
     this.y = this.cy + Math.sin(this.referenceAngle) * this.r;
     var deg = this.referenceAngle/(Math.PI)*180;
     this.angle = deg;
-    this.text.x = Phaser.Math.linearInterpolation([this.cx, this.x], 0.65);
-    this.text.y = Phaser.Math.linearInterpolation([this.cy, this.y], 0.65);
+    this.text.x = Phaser.Math.linearInterpolation([this.cx, this.x], 0.8);
+    this.text.y = Phaser.Math.linearInterpolation([this.cy, this.y], 0.8);
     this.fire(hud);
   }
   //Spawn enemies on short range radar

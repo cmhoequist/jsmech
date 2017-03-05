@@ -192,28 +192,29 @@ function respectBounds(sprite){
 }
 
 function userInput(){
+  var vel = 2;
   if(cursors.left.isDown){
     rangefinderMech.updateAcc(-rangefinderMech.virtualEngineAcc, 0);
     blips.forEach(function(dot){
-      dot.body.velocity.x += 1;
+      dot.body.velocity.x += vel;
     });
   }
   else if(cursors.right.isDown){
     rangefinderMech.updateAcc(rangefinderMech.virtualEngineAcc, 0);
     blips.forEach(function(dot){
-      dot.body.velocity.x -= 1;
+      dot.body.velocity.x -= vel;
     });
   }
   if(cursors.up.isDown){ //should be able to move on two axes simultaneously
     rangefinderMech.updateAcc(0, -rangefinderMech.virtualEngineAcc);
     blips.forEach(function(dot){
-      dot.body.velocity.y += 1;
+      dot.body.velocity.y += vel;
     });
   }
   else if(cursors.down.isDown){
     rangefinderMech.updateAcc(0, rangefinderMech.virtualEngineAcc);
     blips.forEach(function(dot){
-      dot.body.velocity.y -= 1;
+      dot.body.velocity.y -= vel;
     });
   }
 }

@@ -48,8 +48,8 @@ VirtualPhysicsObject = function(game, x, y, texture){
   //Directed movement given target coordinates
   this.moveToward = function(x , y){
     console.log('going');
-    var xdif = this.virtualPos.x - x;
-    var ydif = this.virtualPos.y - y;
+    var xdif = x - this.virtualPos.x;
+    var ydif = y - this.virtualPos.y;
     var angle = Math.atan2(ydif, xdif); // range (-PI, PI]
     if(angle < 0){
       angle += 2*Math.PI; // range [0, 2PI]
