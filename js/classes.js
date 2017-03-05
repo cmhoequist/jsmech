@@ -52,7 +52,7 @@ RFEnemy = function(game, x, y, texture, circle){
     this.text.setText(Math.floor(distance).toString());
     //Color code enemy ranges. (Blue should be beyond effective distance of your [or their?] weapons).
     var pct = distance > this.effectiveRange ? -1 : distance/this.effectiveRange;
-    var c = pct < 0 ? 0x0000ff : Phaser.Color.interpolateColor(0xff0000, 0x00ff00, this.effectiveRange, this.effectiveRange*pct, 1);
+    var c = pct < 0 ? 0x0000ff : Phaser.Color.interpolateColor(0xff0000, 0x00ff00, this.effectiveRange, this.effectiveRange*pct, 1); //start, end, numSteps, currentStep, alpha
     this.tint = c;
     //Recalculate enemy position on rangefinder: angle can be found from distance components
     this.referenceAngle = Math.atan2(ydif, xdif); // range (-PI, PI]

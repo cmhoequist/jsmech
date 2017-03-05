@@ -99,13 +99,13 @@ var hud = {
       }
     }
 
+    //Handle user input
+    userInput();
+
     // Update rangefinder
     for(var i = 0; i < rfEnemies.children.length; i++){
       rfEnemies.children[i].increment(game, rangefinderMech, this);
     }
-
-    //Handle user input
-    userInput();
   },
   spawnRangefinderEnemy : function(rfx,rfy,r){
     var angle = 0;
