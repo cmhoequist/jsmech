@@ -16,6 +16,13 @@ RFEnemy = function(game, x, y, texture, circle){
   this.text.y += this.height/2;
   this.text.anchor.x = 0.5;
   this.text.anchor.y = 0.5;
+  this.effectiveRange = 8000;
+  this.defaultFontSize = 12;
+  this.maxTextScale = 2;
+  this.minTextScale = 1;
+
+  //Virtual movement
+  this.mech = null;
 
   //Firing missiles
   this.startTime = new Date().getTime();
@@ -38,15 +45,22 @@ RFEnemy = function(game, x, y, texture, circle){
     var xdif = this.virtualPos.x - mechCx;
     var ydif = this.virtualPos.y - mechCy;
     var distance = Math.sqrt(xdif*xdif + ydif*ydif);
+    var dcap = distance > this.effectiveRange ? this.effectiveRange : distance;
+    //y = c + ab^-dx: desired scaling is x2 to x1 size from distance ~0 to 500
+    this.text.fontSize = this.defaultFontSize*(this.minTextScale + (this.maxTextScale - this.minTextScale)*Math.pow(2, -0.01*distance));
     this.text.setText(Math.floor(distance).toString());
     //Color code enemy ranges. (Blue should be beyond effective distance of your [or their?] weapons).
-    var pct = distance > 8000 ? -1 : distance/8000;
-    var c = pct < 0 ? 0x0000ff : Phaser.Color.interpolateColor(0xff0000, 0x00ff00, 8000, 8000*pct, 1);
+    var pct = distance > this.effectiveRange ? -1 : distance/this.effectiveRange;
+    var c = pct < 0 ? 0x0000ff : Phaser.Color.interpolateColor(0xff0000, 0x00ff00, this.effectiveRange, this.effectiveRange*pct, 1);
     this.tint = c;
     //Recalculate enemy position on rangefinder: angle can be found from distance components
     this.referenceAngle = Math.atan2(ydif, xdif); // range (-PI, PI]
     if(this.referenceAngle < 0){
       this.referenceAngle += 2*Math.PI; // range [0, 2PI]
+    }
+    //Spawn enemies on short range radar if applicable
+    if(distance < radarComponent.diameter/2){
+      this.showShortRange(distance);
     }
   }
   //HUD position update function
@@ -59,6 +73,31 @@ RFEnemy = function(game, x, y, texture, circle){
     this.text.x = Phaser.Math.linearInterpolation([this.cx, this.x], 0.8);
     this.text.y = Phaser.Math.linearInterpolation([this.cy, this.y], 0.8);
     this.fire(hud);
+  }
+  //Spawn enemies on short range radar
+  this.showShortRange = function(distance){
+    if(this.mech === null){
+      var graphics = game.add.graphics();
+      graphics.lineStyle(1,0xff0000,1);
+      graphics.beginFill(0xff0000, 1);
+      graphics.drawRect(0,0,7,7);
+      var xMax = radarComponent.x + Math.cos(this.referenceAngle)*radarComponent.diameter/2;
+      var yMax = radarComponent.y + Math.sin(this.referenceAngle)*radarComponent.diameter/2;
+      var x = Phaser.Math.linearInterpolation([radarComponent.x, xMax], distance/(radarComponent.diameter/2));
+      var y = Phaser.Math.linearInterpolation([radarComponent.y, yMax], distance/(radarComponent.diameter/2));
+      var texture = graphics.generateTexture();
+      this.mech = enemyMechs.create(x, y, graphics.generateTexture());
+      this.mech.anchor.setTo(0.5,0.5);
+      graphics.destroy();
+    }
+    else{
+      var xMax = radarComponent.x + Math.cos(this.referenceAngle)*radarComponent.diameter/2;
+      var yMax = radarComponent.y + Math.sin(this.referenceAngle)*radarComponent.diameter/2;
+      var x = Phaser.Math.linearInterpolation([radarComponent.x, xMax], distance/(radarComponent.diameter/2));
+      var y = Phaser.Math.linearInterpolation([radarComponent.y, yMax], distance/(radarComponent.diameter/2));
+      this.mech.x = x;
+      this.mech.y = y;
+    }
   }
 };
 

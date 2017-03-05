@@ -11,9 +11,9 @@ VirtualPhysicsObject = function(game, x, y, texture){
   this.virtualPos = {x: game.world.randomX, y: game.world.randomY};
   this.virtualVel = {x: 0, y: 0};
   this.virtualAcc = {x: 0, y: 0};
-  this.virtualEngineAcc = 5;
+  this.virtualEngineAcc = 1;
   this.virtualDrag = 0.2*this.virtualEngineAcc;
-  this.virtualMaxVel = 13; //in meters per second
+  this.virtualMaxVel = 1; //13 in meters per second, theoretically
   this.mechVirtualX = 0;
   this.mechVirtualY = 0;
   this.virtualDistance;
@@ -36,6 +36,25 @@ VirtualPhysicsObject = function(game, x, y, texture){
       this.virtualPos[attr] += this.virtualVel[attr]; //update position
       delta = 0; //reset for each attribute we loop through
     }
+  }
+
+  //Directed movement given an angle in rads
+  this.directedMove = function(direction){
+    this.virtualAcc.x = Math.cos(direction)*Math.sqrt(2*this.virtualEngineAcc*this.virtualEngineAcc);
+    this.virtualAcc.y = Math.sin(direction)*Math.sqrt(2*this.virtualEngineAcc*this.virtualEngineAcc);
+    this.move();
+  }
+
+  //Directed movement given target coordinates
+  this.moveToward = function(x , y){
+    console.log('going');
+    var xdif = this.virtualPos.x - x;
+    var ydif = this.virtualPos.y - y;
+    var angle = Math.atan2(ydif, xdif); // range (-PI, PI]
+    if(angle < 0){
+      angle += 2*Math.PI; // range [0, 2PI]
+    }
+    this.directedMove(angle);
   }
 }
 

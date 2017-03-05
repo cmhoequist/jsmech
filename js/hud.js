@@ -1,5 +1,5 @@
-var blips, radarMech, rangefinderMech, cursors, rfEnemies;
-var circle, radius;
+var blips, playerMech, rangefinderMech, cursors, rfEnemies, enemyMechs;
+var radarComponent, radius;
 var cx, cy;
 var maskedLayer;
 
@@ -12,14 +12,19 @@ var hud = {
     //Housekeeping
     cx = game.world.centerX;
     cy = game.world.centerY;
+    blips = game.add.group();
+    blips.enableBody = true;
+    rfEnemies = game.add.group();
+    rfEnemies.enableBody = true;
     maskedLayer = game.add.group();
+    enemyMechs = game.add.group();
     var graphics = game.add.graphics(0, 0);
     graphics.lineStyle(1, 0x00ff00, 1);
 
     //Create arc boundaries for HUD components
-    circle = new Phaser.Circle(cx, cy, game.height/2);
-    radius = circle.diameter/2;
-    graphics.drawCircle(circle.x, circle.y, circle.diameter);
+    radarComponent = new Phaser.Circle(cx, cy, game.height/2);
+    radius = radarComponent.diameter/2;
+    graphics.drawCircle(radarComponent.x, radarComponent.y, radarComponent.diameter);
     var r2 = radius+25;
     var offset = 10;
     var radx = [Phaser.Math.degToRad(offset), Phaser.Math.degToRad(180-offset), Phaser.Math.degToRad(180+offset), Phaser.Math.degToRad(360-offset)];
@@ -45,19 +50,19 @@ var hud = {
     }
 
     //Create radar HUD component
-    radarMech = game.add.sprite(cx, cy,'mech');
-    radarMech.x -= radarMech.width/2;
-    radarMech.y -= radarMech.height/2;
-    game.physics.arcade.enable(radarMech);
-    radarMech.body.immovable = true;
+    playerMech = game.add.sprite(cx, cy,'mech');
+    playerMech.x -= playerMech.width/2;
+    playerMech.y -= playerMech.height/2;
+    game.physics.arcade.enable(playerMech);
+    playerMech.body.immovable = true;
     //Create radar blips
-    blips = game.add.group();
-    blips.enableBody = true;
+
+
     maskedLayer.add(blips);
     //Mask radar blips (lets us cut corners on pixel-perfect radar bounds collision detection)
     var mask = game.add.graphics(0, 0);
     mask.beginFill(0xffffff);
-    mask.drawCircle(circle.x, circle.y, circle.diameter+1.5);
+    mask.drawCircle(radarComponent.x, radarComponent.y, radarComponent.diameter+1.5);
     mask.endFill();
     maskedLayer.mask = mask;
 
@@ -71,8 +76,7 @@ var hud = {
     var rangefinderradius = Math.min(0.8*(x1-x0),0.8*(y0-y1))/2;
     graphics.drawCircle(rangefinderx, rangefindery, rangefinderradius*2);
     rangefinderMech = new VirtualPhysicsObject(game, rangefinderx, rangefindery, 'mech');
-    rfEnemies = game.add.group();
-    rfEnemies.enableBody = true;
+
     for(var i = 0; i < 3; i++){
         this.spawnRangefinderEnemy(rangefinderx, rangefindery, rangefinderradius);
     }
@@ -82,12 +86,12 @@ var hud = {
   },
   update: function(){
     //Kill radar blips that overlap with the figure in the center (mech)
-    game.physics.arcade.overlap(radarMech,blips,this.radarCollisions,null,this);
+    game.physics.arcade.overlap(playerMech,blips,this.radarCollisions,null,this);
     //Kill radar blips that go out of bounds and replace with new blip
     for(var i = 0; i < blips.children.length; i++){
       var currentBlip = blips.children[i];
-      var dx = currentBlip.x - circle.x;
-      var dy = currentBlip.y - circle.y;
+      var dx = currentBlip.x - radarComponent.x;
+      var dy = currentBlip.y - radarComponent.y;
       var dist = dx*dx + dy*dy;
       var fatDist = (dx+currentBlip.width)*(dx+currentBlip.width) + (dy+currentBlip.height)*(dy+currentBlip.height);
       if( dist >= radius*radius){
@@ -95,7 +99,7 @@ var hud = {
       }
     }
 
-    //Update rangefinder
+    // Update rangefinder
     for(var i = 0; i < rfEnemies.children.length; i++){
       rfEnemies.children[i].increment(game, rangefinderMech, this);
     }
@@ -118,7 +122,7 @@ var hud = {
   },
   radarCollisions : function(mech, blip){
     blip.kill();
-    game.state.start('Gameover', true, false);
+    // game.state.start('Gameover', true, false);
     //p1: state to start
     //p2: clearWorld: default is true, clears World display list (not Stage display list)
     //p3: clearCache: default is false, clears all loaded assets
@@ -168,21 +172,21 @@ var hud = {
     }
   },
   render : function(){
-    game.debug.spriteInfo(radarMech, 32, 32);
+    game.debug.spriteInfo(playerMech, 32, 32);
   }
 }
 
 function respectBounds(sprite){
-  if(sprite.x < circle.x){
+  if(sprite.x < radarComponent.x){
     sprite.x += sprite.width/2;
   }
-  else if(sprite.x > circle.x){
+  else if(sprite.x > radarComponent.x){
     sprite.x -= sprite.width/2;
   }
-  if(sprite.y < circle.y){
+  if(sprite.y < radarComponent.y){
     sprite.y += sprite.height/2;
   }
-  else if(sprite.y > circle.y){
+  else if(sprite.y > radarComponent.y){
     sprite.y -= sprite.height/2;
   }
 }
