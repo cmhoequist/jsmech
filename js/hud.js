@@ -204,7 +204,7 @@ function userInput(){
       dot.body.velocity.x -= 1;
     });
   }
-  else if(cursors.up.isDown){
+  if(cursors.up.isDown){ //should be able to move on two axes simultaneously
     rangefinderMech.updateAcc(0, -rangefinderMech.virtualEngineAcc);
     blips.forEach(function(dot){
       dot.body.velocity.y += 1;

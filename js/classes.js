@@ -9,11 +9,14 @@ RFEnemy = function(game, x, y, texture, circle){
   this.referenceAngle = Math.random()*(2*Math.PI);  //angle relative to the player-mech: starting position is random
   this.angle = 0;
 
+  //Radar positioning
+  this.mech = null;
+  this.sgfx = game.add.graphics(radarComponent.x,radarComponent.y);
+  this.sgfx.lineStyle(1,0xff0000,0.75);
+
   //Informational text
   this.style = { font: '12px courier', fill: '#ffffff'};
   this.text = game.add.text(x,y, '', this.style);
-  this.text.x = this.width/2 - this.text.width/2;
-  this.text.y += this.height/2;
   this.text.anchor.x = 0.5;
   this.text.anchor.y = 0.5;
   this.effectiveRange = 8000;
@@ -21,8 +24,6 @@ RFEnemy = function(game, x, y, texture, circle){
   this.maxTextScale = 2;
   this.minTextScale = 1;
 
-  //Virtual movement
-  this.mech = null;
 
   //Firing missiles
   this.startTime = new Date().getTime();
@@ -62,6 +63,10 @@ RFEnemy = function(game, x, y, texture, circle){
     if(distance < radarComponent.diameter/2){
       this.showShortRange(distance);
     }
+    else if(this.mech !== null && this.mech.alive){
+      this.mech.kill();
+      this.sgfx.clear();
+    }
   }
   //HUD position update function
   this.increment = function(game, mech, hud){
@@ -70,8 +75,8 @@ RFEnemy = function(game, x, y, texture, circle){
     this.y = this.cy + Math.sin(this.referenceAngle) * this.r;
     var deg = this.referenceAngle/(Math.PI)*180;
     this.angle = deg;
-    this.text.x = Phaser.Math.linearInterpolation([this.cx, this.x], 0.8);
-    this.text.y = Phaser.Math.linearInterpolation([this.cy, this.y], 0.8);
+    this.text.x = Phaser.Math.linearInterpolation([this.cx, this.x], 0.65);
+    this.text.y = Phaser.Math.linearInterpolation([this.cy, this.y], 0.65);
     this.fire(hud);
   }
   //Spawn enemies on short range radar
@@ -91,6 +96,9 @@ RFEnemy = function(game, x, y, texture, circle){
       graphics.destroy();
     }
     else{
+      if(!this.mech.alive){
+        this.mech.revive();
+      }
       var xMax = radarComponent.x + Math.cos(this.referenceAngle)*radarComponent.diameter/2;
       var yMax = radarComponent.y + Math.sin(this.referenceAngle)*radarComponent.diameter/2;
       var x = Phaser.Math.linearInterpolation([radarComponent.x, xMax], distance/(radarComponent.diameter/2));
@@ -98,6 +106,10 @@ RFEnemy = function(game, x, y, texture, circle){
       this.mech.x = x;
       this.mech.y = y;
     }
+    this.sgfx.clear(); //erases lineStyle data, among other things
+    this.sgfx.lineStyle(1,0xff0000,1);
+    this.sgfx.moveTo(0,0); //reposition relative to its own initialized origin
+    this.sgfx.lineTo(this.mech.x - this.sgfx.x, this.mech.y - this.sgfx.y);
   }
 };
 
