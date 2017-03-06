@@ -3,9 +3,10 @@ var playerMech, enemyMechs, missiles;
 
 //HUD entities
 var rangefinderMech, radarMech, rangefinderEnemies;
-var radarComponent, radarRadius, rangefinderComponent, rangefinderRadius;
+var radarRadius, rangefinderRadius;
 var centerX, centerY;
 var maskedLayer;
+var graphics;
 
 //input
 var cursors;
@@ -17,21 +18,19 @@ var hud = {
   },
   create : function(){
     //Housekeeping
-    centerX = game.world.centerX;
-    centerY = game.world.centerY;
     missiles = game.add.group();
-    // missiles.enableBody = true;
     rangefinderEnemies = game.add.group();
     rangefinderEnemies.enableBody = true;
     maskedLayer = game.add.group();
     enemyMechs = game.add.group();
-    var graphics = game.add.graphics(0, 0);
+    graphics = game.add.graphics(0, 0);
     graphics.lineStyle(1, 0x00ff00, 1);
+    centerX = game.world.centerX;
+    centerY = game.world.centerY;
 
     //Create arc boundaries for HUD components
-    radarComponent = new Phaser.Circle(centerX, centerY, game.height/2);
-    radarRadius = radarComponent.diameter/2;
-    graphics.drawCircle(radarComponent.x, radarComponent.y, radarComponent.diameter);
+    graphics.drawCircle(centerX, centerY, game.height/2);
+    radarRadius = game.height/4;
     var r2 = radarRadius+25;
     var offset = 10;
     var radx = [Phaser.Math.degToRad(offset), Phaser.Math.degToRad(180-offset), Phaser.Math.degToRad(180+offset), Phaser.Math.degToRad(360-offset)];
@@ -58,18 +57,15 @@ var hud = {
 
     //Create radar HUD component
     radarMech = game.add.sprite(centerX, centerY,'mech');
-    radarMech.x -= radarMech.width/2;
-    radarMech.y -= radarMech.height/2;
+    radarMech.anchor.setTo(0.5,0.5);
     game.physics.arcade.enable(radarMech);
     radarMech.body.immovable = true;
     //Create radar missiles
-
-
     maskedLayer.add(missiles);
     //Mask radar missiles (lets us cut corners on pixel-perfect radar bounds collision detection)
     var mask = game.add.graphics(0, 0);
     mask.beginFill(0xffffff);
-    mask.drawCircle(radarComponent.x, radarComponent.y, radarComponent.diameter+1.5);
+    mask.drawCircle(centerX, centerY, radarRadius*2);
     mask.endFill();
     maskedLayer.mask = mask;
 
@@ -78,7 +74,7 @@ var hud = {
     var x1 = game.world.width-20;
     var y0 = centerY+Math.sin(radx[3])*r2;
     var y1 = 20;
-    var rangefinderx = (x0+x1)/2;
+    var rangefinderx = (x0+x1)/2; //math to find rfx, rfy, and rfr just a matter of aesthetic preference
     var rangefindery = (y0+y1)/2;
     var rangefinderradius = Math.min(0.8*(x1-x0),0.8*(y0-y1))/2;
     graphics.drawCircle(rangefinderx, rangefindery, rangefinderradius*2);
@@ -96,7 +92,6 @@ var hud = {
     // game.physics.arcade.overlap(radarMech,missiles,this.radarCollisions,null,this);
     //Kill radar missiles that go out of bounds and replace with new blip
     for(var i = 0; i < missiles.children.length; i++){
-
       var currentBlip = missiles.children[i];
       currentBlip.move();
     }

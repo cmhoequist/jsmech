@@ -17,9 +17,9 @@ Missile = function(game, x, y, texture, spawnAngle){
     VirtualPhysicsObject.prototype.move.call(this);
     this.x = this.virtualPos.x;
     this.y = this.virtualPos.y;
-    var x = this.x - radarComponent.x;
-    var y = this.x - radarComponent.y;
-    if(Math.abs(this.x - radarComponent.x) >= radarRadius && Math.abs(this.y - radarComponent.y) >= radarRadius){
+    var x = this.x - centerX;
+    var y = this.x - centerY;
+    if(Math.abs(this.x - centerX) >= radarRadius && Math.abs(this.y - centerY) >= radarRadius){
       this.kill();
     }
   }

@@ -11,7 +11,7 @@ RFEnemy = function(game, x, y, texture, circle){
 
   //Radar positioning
   this.mech = null;
-  this.sgfx = game.add.graphics(radarComponent.x,radarComponent.y);
+  this.sgfx = game.add.graphics(centerX,centerY);
   this.sgfx.lineStyle(1,0xff0000,0.75);
 
   //Informational text
@@ -88,7 +88,7 @@ RFEnemy = function(game, x, y, texture, circle){
       this.referenceAngle += 2*Math.PI; // range [0, 2PI]
     }
     //Spawn enemies on short range radar if applicable
-    if(distance < radarComponent.diameter/2){
+    if(distance < radarRadius){
       this.showShortRange(distance);
     }
     else if(this.mech !== null && this.mech.alive){
@@ -116,10 +116,10 @@ RFEnemy = function(game, x, y, texture, circle){
       graphics.lineStyle(1,0xff0000,1);
       graphics.beginFill(0xff0000, 1);
       graphics.drawRect(0,0,7,7);
-      var xMax = radarComponent.x + Math.cos(this.referenceAngle)*radarComponent.diameter/2;
-      var yMax = radarComponent.y + Math.sin(this.referenceAngle)*radarComponent.diameter/2;
-      var x = Phaser.Math.linearInterpolation([radarComponent.x, xMax], distance/(radarComponent.diameter/2));
-      var y = Phaser.Math.linearInterpolation([radarComponent.y, yMax], distance/(radarComponent.diameter/2));
+      var xMax = centerX + Math.cos(this.referenceAngle)*radarRadius;
+      var yMax = centerY + Math.sin(this.referenceAngle)*radarRadius;
+      var x = Phaser.Math.linearInterpolation([centerX, xMax], distance/(radarRadius));
+      var y = Phaser.Math.linearInterpolation([centerY, yMax], distance/(radarRadius));
       var texture = graphics.generateTexture();
       this.mech = enemyMechs.create(x, y, graphics.generateTexture());
       this.mech.anchor.setTo(0.5,0.5);
@@ -129,10 +129,10 @@ RFEnemy = function(game, x, y, texture, circle){
       if(!this.mech.alive){
         this.mech.revive();
       }
-      var xMax = radarComponent.x + Math.cos(this.referenceAngle)*radarComponent.diameter/2;
-      var yMax = radarComponent.y + Math.sin(this.referenceAngle)*radarComponent.diameter/2;
-      var x = Phaser.Math.linearInterpolation([radarComponent.x, xMax], distance/(radarComponent.diameter/2));
-      var y = Phaser.Math.linearInterpolation([radarComponent.y, yMax], distance/(radarComponent.diameter/2));
+      var xMax = centerX + Math.cos(this.referenceAngle)*radarRadius;
+      var yMax = centerY + Math.sin(this.referenceAngle)*radarRadius;
+      var x = Phaser.Math.linearInterpolation([centerX, xMax], distance/(radarRadius));
+      var y = Phaser.Math.linearInterpolation([centerY, yMax], distance/(radarRadius));
       this.mech.x = x;
       this.mech.y = y;
     }
