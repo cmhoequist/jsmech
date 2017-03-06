@@ -82,7 +82,7 @@ var hud = {
     rangefinderMech = game.add.sprite(rangefinderx, rangefindery, 'mech');
 
     //Create player
-    virtualPlayerMech = new VirtualPhysicsObject(centerX, centerY);
+    virtualPlayerMech = new VirtualPlayerMech(centerX, centerY);
 
     //Create enemies
     for(var i = 0; i < 3; i++){
@@ -142,10 +142,8 @@ function userInput(){
     theta += 2*Math.PI; // range [0, 2PI]
   }
   if(!(x === 0 && y === 0)){
-    console.log('how the hell '+x+', '+y);
     virtualPlayerMech.directedMove(theta);
   }
-
 }
 
 function spawnEnemyMech(){

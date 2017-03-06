@@ -145,15 +145,3 @@ RFEnemy = function(game, x, y, texture, circle){
 
 RFEnemy.prototype = Object.create(VirtualPhysicsObject.prototype);
 RFEnemy.prototype.constructor = RFEnemy;
-
-PlayerMech = function(game, x, y, texture){
-  //Inheritance
-  VirtualPhysicsObject.call(this, game, x, y, texture);
-
-  //Overriden virtual physics
-  this.virtualMaxVel = 2;
-
-}
-
-PlayerMech.prototype = Object.create(VirtualPhysicsObject.prototype);
-PlayerMech.prototype.constructor = PlayerMech;

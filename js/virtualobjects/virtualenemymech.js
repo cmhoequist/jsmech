@@ -15,21 +15,29 @@ VirtualEnemyMech = function(x, y){
 
   //Expect no subclassing, instance methods follow
   this.updateBehavior = function(targetPos){
+    //Update movement
     if(!this.disabled){
         this.moveToward(targetPos.x, targetPos.y);
-        if(Math.abs(targetPos.x - this.virtualPos.x) < this.virtualMaxVel && Math.abs(targetPos.y - this.virtualPos.y) < this.virtualMaxVel){
-          this.disabled = true; //TODO: something better here
-        }
     }
+    //TODO: something better than this quick and dirty code for visual debugging
+    if(Math.abs(targetPos.x - this.virtualPos.x) < this.virtualMaxVel && Math.abs(targetPos.y - this.virtualPos.y) < this.virtualMaxVel){
+      this.disabled = true;
+    }
+    else{
+      this.disabled = false;
+    }
+    //Update displays
     for(var avatar in this.incarnations){
       if(this.incarnations[avatar] !== null){
           this.incarnations[avatar].updateDisplay(targetPos, this);
       }
     }
-    if(Math.abs(this.virtualPos.x-centerX) < radarRadius && Math.abs(this.virtualPos.y-centerY) < radarRadius){
+    //Spawn radar representation if applicable
+    var deltax = this.virtualPos.x - targetPos.x;
+    var deltay = this.virtualPos.y - targetPos.y;
+    var distance = Math.sqrt(deltax*deltax + deltay*deltay);
+    if(distance < radarRadius){
       if(this.incarnations.radar === null){
-        var deltax = this.virtualPos.x - targetPos.x;
-        var deltay = this.virtualPos.y - targetPos.y;
         var referenceAngle = Math.atan2(deltay, deltax); // range (-PI, PI]
         if(this.referenceAngle < 0){
           this.referenceAngle += 2*Math.PI; // range [0, 2PI]
@@ -41,6 +49,9 @@ VirtualEnemyMech = function(x, y){
       else if(!this.incarnations.radar.alive){
         this.incarnations.radar.revive();
       }
+    }
+    else if(this.incarnations.radar !== null && this.incarnations.radar.alive){
+      this.incarnations.radar.kill();
     }
   }
 }
