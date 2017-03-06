@@ -13,7 +13,7 @@ var hud = {
     cx = game.world.centerX;
     cy = game.world.centerY;
     blips = game.add.group();
-    blips.enableBody = true;
+    // blips.enableBody = true;
     rfEnemies = game.add.group();
     rfEnemies.enableBody = true;
     maskedLayer = game.add.group();
@@ -86,17 +86,19 @@ var hud = {
   },
   update: function(){
     //Kill radar blips that overlap with the figure in the center (mech)
-    game.physics.arcade.overlap(radarMech,blips,this.radarCollisions,null,this);
+    // game.physics.arcade.overlap(radarMech,blips,this.radarCollisions,null,this);
     //Kill radar blips that go out of bounds and replace with new blip
     for(var i = 0; i < blips.children.length; i++){
+
       var currentBlip = blips.children[i];
-      var dx = currentBlip.x - radarComponent.x;
-      var dy = currentBlip.y - radarComponent.y;
-      var dist = dx*dx + dy*dy;
-      var fatDist = (dx+currentBlip.width)*(dx+currentBlip.width) + (dy+currentBlip.height)*(dy+currentBlip.height);
-      if( dist >= radarRadius*radarRadius){
-        currentBlip.kill();
-      }
+      currentBlip.move();
+      // var dx = currentBlip.x - radarComponent.x;
+      // var dy = currentBlip.y - radarComponent.y;
+      // var dist = dx*dx + dy*dy;
+      // var fatDist = (dx+currentBlip.width)*(dx+currentBlip.width) + (dy+currentBlip.height)*(dy+currentBlip.height);
+      // if( dist >= radarRadius*radarRadius){
+      //   currentBlip.kill();
+      // }
     }
 
     //Handle user input
@@ -127,94 +129,22 @@ var hud = {
     //p2: clearWorld: default is true, clears World display list (not Stage display list)
     //p3: clearCache: default is false, clears all loaded assets
   },
-  spawnBlip : function(spawnAngle){
-    var missile = blips.getFirstExists(false);
-    //Set position (determined by position of enemy relative to mech)
-    var x = cx+Math.cos(spawnAngle)*radarRadius;
-    var y = cy+Math.sin(spawnAngle)*radarRadius;
-    //Set semirandom speed
-    var dx = x-cx;
-    var dy = y-cy;
-    var speedFudge = Math.random()*(0.75 - 0.35)+0.35;
-    var vx = -speedFudge*dx;
-    var vy = -speedFudge*dy;
-    var spd = Math.sqrt(vx*vx + vy*vy);
-
-    if(missile === null){
-      //Draw blip
-      var gfx = game.add.graphics();
-      gfx.lineStyle(1, 0xff0000, 1);
-      gfx.drawCircle(0,0,5); //positioned relative to sprite
-      missile = blips.create(x, y, gfx.generateTexture());
-      gfx.destroy();
-      //Position speed text beneath radar blip
-      var style = { font: '12px courier', fill: '#ffffff'};
-      var text = game.add.text(0,0, Math.floor(spd).toString(), style);
-      text.x = missile.width/2 - text.width/2;
-      text.y += missile.height/2;
-      missile.addChild(text);
-      //Adjust blip positioning around circumference of radar
-      respectBounds(missile);
-      //Actualize blip speed
-      missile.body.velocity.x = vx;
-      missile.body.velocity.y = vy;
-    }
-    else{
-      missile.x = x;
-      missile.y = y;
-      respectBounds(missile);
-      missile.body.velocity.x = vx;
-      missile.body.velocity.y = vy;
-      missile.revive();
-      var tx = missile.children[0];
-      tx.setText(Math.floor(spd).toString());
-      tx.x = missile.width/2 - tx.width/2;
-    }
-  },
   render : function(){
     game.debug.spriteInfo(radarMech, 32, 32);
   }
 }
 
-function respectBounds(sprite){
-  if(sprite.x < radarComponent.x){
-    sprite.x += sprite.width/2;
-  }
-  else if(sprite.x > radarComponent.x){
-    sprite.x -= sprite.width/2;
-  }
-  if(sprite.y < radarComponent.y){
-    sprite.y += sprite.height/2;
-  }
-  else if(sprite.y > radarComponent.y){
-    sprite.y -= sprite.height/2;
-  }
-}
-
 function userInput(){
-  var vel = 2;
   if(cursors.left.isDown){
     rangefinderMech.updateAcc(-rangefinderMech.virtualEngineAcc, 0);
-    blips.forEach(function(dot){
-      dot.body.velocity.x += vel;
-    });
   }
   else if(cursors.right.isDown){
     rangefinderMech.updateAcc(rangefinderMech.virtualEngineAcc, 0);
-    blips.forEach(function(dot){
-      dot.body.velocity.x -= vel;
-    });
   }
   if(cursors.up.isDown){ //should be able to move on two axes simultaneously
     rangefinderMech.updateAcc(0, -rangefinderMech.virtualEngineAcc);
-    blips.forEach(function(dot){
-      dot.body.velocity.y += vel;
-    });
   }
   else if(cursors.down.isDown){
     rangefinderMech.updateAcc(0, rangefinderMech.virtualEngineAcc);
-    blips.forEach(function(dot){
-      dot.body.velocity.y -= vel;
-    });
   }
 }

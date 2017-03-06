@@ -17,15 +17,27 @@ VirtualPhysicsObject = function(game, x, y, texture){
   this.mechVirtualX = 0;
   this.mechVirtualY = 0;
   this.virtualDistance;
+}
 
-  this.updateAcc = function(accx, accy){
+VirtualPhysicsObject.prototype = Object.create(Phaser.Sprite.prototype);
+VirtualPhysicsObject.prototype.constructor = VirtualPhysicsObject;
+
+//Extend prototype with member functions
+extendPrototype = function(prototype, fns){
+  for(var f in fns){
+    prototype[f] = fns[f];
+  }
+}
+
+extendPrototype(VirtualPhysicsObject.prototype, {
+  updateAcc : function(accx, accy){
     this.virtualAcc.x = accx;
     this.virtualAcc.y = accy;
     this.move();
-  }
+  },
 
   //Maneuvering update function
-  this.move = function(){
+  move: function(){
     var delta = 0;
     for(var attr in this.virtualPos){ //classical physics fields (x,v,a) all have the same attributes (x-coord, y-coord)
       delta += -this.virtualVel[attr]*this.virtualDragCoeff; //apply drag in opposite direction of motion
@@ -41,17 +53,17 @@ VirtualPhysicsObject = function(game, x, y, texture){
       this.virtualPos[attr] += this.virtualVel[attr]; //update position
       delta = 0; //reset for each attribute we loop through
     }
-  }
+  },
 
   //Directed movement given an angle in rads
-  this.directedMove = function(direction){
+  directedMove : function(direction){
     this.virtualAcc.x = Math.cos(direction)*this.virtualEngineAcc;
     this.virtualAcc.y = Math.sin(direction)*this.virtualEngineAcc;
     this.move();
-  }
+  },
 
   //Directed movement given target coordinates
-  this.moveToward = function(x , y){
+  moveToward : function(x , y){
     var xdif = x - this.virtualPos.x;
     var ydif = y - this.virtualPos.y;
     var angle = Math.atan2(ydif, xdif); // range (-PI, PI]
@@ -60,7 +72,4 @@ VirtualPhysicsObject = function(game, x, y, texture){
     }
     this.directedMove(angle);
   }
-}
-
-VirtualPhysicsObject.prototype = Object.create(Phaser.Sprite.prototype);
-VirtualPhysicsObject.prototype.constructor = VirtualPhysicsObject;
+});
