@@ -36,10 +36,10 @@ RFEnemy = function(game, x, y, texture, circle){
     if(this.timeElapsed > this.reloadDelay){
       this.startTime = currentTime;
       //Spawn blip
-      var missile = blips.getFirstExists(false);
+      var missile = missiles.getFirstExists(false);
       //Set position (determined by position of enemy relative to mech)
-      var x = this.mech === null ? cx+Math.cos(this.referenceAngle)*radarRadius : this.mech.x;
-      var y = this.mech === null ? cy+Math.sin(this.referenceAngle)*radarRadius : this.mech.y;
+      var x = this.mech === null ? centerX+Math.cos(this.referenceAngle)*radarRadius : this.mech.x;
+      var y = this.mech === null ? centerY+Math.sin(this.referenceAngle)*radarRadius : this.mech.y;
 
       if(missile === null){
         //Draw blip
@@ -47,7 +47,7 @@ RFEnemy = function(game, x, y, texture, circle){
         gfx.lineStyle(1, 0xff0000, 1);
         gfx.drawCircle(0,0,5); //positioned relative to sprite
         missile = new Missile(game, x, y, gfx.generateTexture(), this.referenceAngle);
-        blips.add(missile);
+        missiles.add(missile);
         gfx.destroy();
         //Position speed text beneath radar blip
         var style = { font: '12px courier', fill: '#ffffff'};
