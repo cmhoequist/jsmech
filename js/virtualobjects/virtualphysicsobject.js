@@ -1,14 +1,14 @@
 //Subclasses Sprite, adds support for virtual kinematics
-VirtualPhysicsObject = function(game, x, y, texture){
-  //Inheritance
-  Phaser.Sprite.call(this, game, x, y, texture);
-  game.add.existing(this);
+VirtualPhysicsObject = function(x, y){
+  //Inheritance - TODO: no inheritance! Decouple virtual motion from displayed motion.
+  // Phaser.Sprite.call(this, game, x, y, texture);
+  // game.add.existing(this); //Adds an existing display object to the world
 
   //Housekeeping
-  this.anchor.setTo(0.5,0.5);
+  // this.anchor.setTo(0.5,0.5);
 
   //Virtual physics
-  this.virtualPos = {x: game.world.randomX, y: game.world.randomY};
+  this.virtualPos = {x: x, y: y};
   this.virtualVel = {x: 0, y: 0};
   this.virtualAcc = {x: 0, y: 0};
   this.virtualEngineAcc = 1;
@@ -19,8 +19,8 @@ VirtualPhysicsObject = function(game, x, y, texture){
   this.virtualDistance;
 }
 
-VirtualPhysicsObject.prototype = Object.create(Phaser.Sprite.prototype);
-VirtualPhysicsObject.prototype.constructor = VirtualPhysicsObject;
+// VirtualPhysicsObject.prototype = Object.create(Phaser.Sprite.prototype);
+// VirtualPhysicsObject.prototype.constructor = VirtualPhysicsObject;
 
 //Extend prototype with member functions
 extendPrototype = function(prototype, fns){
@@ -49,7 +49,6 @@ extendPrototype(VirtualPhysicsObject.prototype, {
       else if(this.virtualVel[attr] > this.virtualMaxVel){
         this.virtualVel[attr] = this.virtualMaxVel;
       }
-
       this.virtualPos[attr] += this.virtualVel[attr]; //update position
       delta = 0; //reset for each attribute we loop through
     }

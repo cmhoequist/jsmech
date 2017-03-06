@@ -1,9 +1,9 @@
 //Virtual entities
-var playerMech, enemyMechs, missiles;
+var virtualPlayerMech, virtualEnemyMechs = [], virtualMissiles = []; //Note that groups only contain DISPLAY entities, so these will be lists.
 
 //HUD entities
-var rangefinderMech, radarMech, rangefinderEnemies;
-var radarRadius, rangefinderRadius;
+var rangefinderMech, radarMech, enemyMechs, missiles;
+var radarRadius, rangefinderRadius, rangefinder, radar;
 var centerX, centerY;
 var maskedLayer;
 var graphics;
@@ -18,15 +18,15 @@ var hud = {
   },
   create : function(){
     //Housekeeping
-    missiles = game.add.group();
-    rangefinderEnemies = game.add.group();
-    rangefinderEnemies.enableBody = true;
-    maskedLayer = game.add.group();
-    enemyMechs = game.add.group();
-    graphics = game.add.graphics(0, 0);
-    graphics.lineStyle(1, 0x00ff00, 1);
     centerX = game.world.centerX;
     centerY = game.world.centerY;
+    enemyMechs = game.add.group();
+    missiles = game.add.group();
+
+    maskedLayer = game.add.group();
+    graphics = game.add.graphics(0, 0);
+    graphics.lineStyle(1, 0x00ff00, 1);
+
 
     //Create arc boundaries for HUD components
     graphics.drawCircle(centerX, centerY, game.height/2);
@@ -56,13 +56,13 @@ var hud = {
     }
 
     //Create radar HUD component
+    radar = {x: centerX, y: centerY, r: game.height/2};
     radarMech = game.add.sprite(centerX, centerY,'mech');
     radarMech.anchor.setTo(0.5,0.5);
     game.physics.arcade.enable(radarMech);
     radarMech.body.immovable = true;
-    //Create radar missiles
-    maskedLayer.add(missiles);
     //Mask radar missiles (lets us cut corners on pixel-perfect radar bounds collision detection)
+    maskedLayer.add(missiles);
     var mask = game.add.graphics(0, 0);
     mask.beginFill(0xffffff);
     mask.drawCircle(centerX, centerY, radarRadius*2);
@@ -77,15 +77,27 @@ var hud = {
     var rangefinderx = (x0+x1)/2; //math to find rfx, rfy, and rfr just a matter of aesthetic preference
     var rangefindery = (y0+y1)/2;
     var rangefinderradius = Math.min(0.8*(x1-x0),0.8*(y0-y1))/2;
+    rangefinder = {x: rangefinderx, y: rangefindery, r: rangefinderradius};
     graphics.drawCircle(rangefinderx, rangefindery, rangefinderradius*2);
-    rangefinderMech = new VirtualPhysicsObject(game, rangefinderx, rangefindery, 'mech');
+    rangefinderMech = game.add.sprite(rangefinderx, rangefindery, 'mech');
 
+    //Create player
+    virtualPlayerMech = new VirtualPhysicsObject(centerX, centerY);
+
+    //Create enemies
     for(var i = 0; i < 3; i++){
-        this.spawnRangefinderEnemy(rangefinderx, rangefindery, rangefinderradius);
+        spawnEnemyMech();
     }
 
     //Arrow key inputs
     cursors = game.input.keyboard.createCursorKeys();
+  },
+  radarCollisions : function(mech, blip){
+    blip.kill();
+    // game.state.start('Gameover', true, false);
+    //p1: state to start
+    //p2: clearWorld: default is true, clears World display list (not Stage display list)
+    //p3: clearCache: default is false, clears all loaded assets
   },
   update: function(){
     //Kill radar missiles that overlap with the figure in the center (mech)
@@ -96,50 +108,46 @@ var hud = {
       currentBlip.move();
     }
 
-    //Handle user input
+    //Handle user input (updates player mech)
     userInput();
 
-    // Update rangefinder
-    for(var i = 0; i < rangefinderEnemies.children.length; i++){
-      rangefinderEnemies.children[i].increment(game, rangefinderMech, this);
+    //Update virtual enemy mechs
+    for(var i = 0; i < virtualEnemyMechs.length; i++){
+      virtualEnemyMechs[i].updateBehavior(virtualPlayerMech.virtualPos);
     }
-  },
-  spawnRangefinderEnemy : function(rfx,rfy,r){
-    var angle = 0;
-    var x = rfx+Math.cos(angle)*r;
-    var y = rfy+Math.sin(angle)*r;
-    var h = 10;
-    var graphics = game.add.graphics(x,y);
-    graphics.lineStyle(4,0xffffff,1);
-    graphics.lineTo(Math.cos(angle)*h,Math.sin(angle)*h);
-    // var sprite = rangefinderEnemies.create(x,y,graphics.generateTexture());
-    var circle = {x: rfx, y: rfy, radius: r};
-    rangefinderEnemies.add(new RFEnemy(game, x, y, graphics.generateTexture(), circle));
-    graphics.destroy();
-  },
-  radarCollisions : function(mech, blip){
-    blip.kill();
-    // game.state.start('Gameover', true, false);
-    //p1: state to start
-    //p2: clearWorld: default is true, clears World display list (not Stage display list)
-    //p3: clearCache: default is false, clears all loaded assets
   },
   render : function(){
     game.debug.spriteInfo(radarMech, 32, 32);
   }
+
 }
 
 function userInput(){
+  var x = 0, y = 0;
   if(cursors.left.isDown){
-    rangefinderMech.updateAcc(-rangefinderMech.virtualEngineAcc, 0);
+    console.log
+    x = -1;
   }
   else if(cursors.right.isDown){
-    rangefinderMech.updateAcc(rangefinderMech.virtualEngineAcc, 0);
+    x = 1;
   }
   if(cursors.up.isDown){ //should be able to move on two axes simultaneously
-    rangefinderMech.updateAcc(0, -rangefinderMech.virtualEngineAcc);
+    y = -1;
   }
   else if(cursors.down.isDown){
-    rangefinderMech.updateAcc(0, rangefinderMech.virtualEngineAcc);
+   y = 1;
   }
+  var theta = Math.atan2(y, x); // range (-PI, PI]
+  if(theta < 0){
+    theta += 2*Math.PI; // range [0, 2PI]
+  }
+  if(!(x === 0 && y === 0)){
+    console.log('how the hell '+x+', '+y);
+    virtualPlayerMech.directedMove(theta);
+  }
+
+}
+
+function spawnEnemyMech(){
+  var vMech = new VirtualEnemyMech(game.world.randomX, game.world.randomY);
 }
