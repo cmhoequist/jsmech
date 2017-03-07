@@ -39,6 +39,7 @@ var hud = {
     graphics.arc(centerX, centerY, r2, rady[1], radx[1], false);
     graphics.arc(centerX, centerY, r2, radx[2], rady[2], false);
     graphics.arc(centerX, centerY, r2, rady[3], radx[3], false);
+
     //Draw line boundaries for HUD components
     for(var i = 0; i < radx.length; i++){
       var x = centerX+Math.cos(radx[i])*r2;
@@ -80,6 +81,30 @@ var hud = {
     rangefinder = {x: rangefinderx, y: rangefindery, r: rangefinderradius};
     graphics.drawCircle(rangefinderx, rangefindery, rangefinderradius*2);
     rangefinderMech = game.add.sprite(rangefinderx, rangefindery, 'mech');
+
+    //Create compass
+    var compassGap = 15;
+    var y1 = centerY + Math.sin(rady[3])*r2;
+    var y0 = 20;
+    var compassr = (y1 - y0)/2;
+    var compassy = rangefinder.y - rangefinder.r + compassr;
+    var crTheta = Math.asin((rangefinder.y - compassy)/(rangefinder.r + compassr + compassGap)); //on the range -pi/2 to pi/2
+    if(crTheta < 0){
+      crTheta += 2*Math.PI; // range [0, 2PI]
+    }
+    var compassxdif = Math.cos(crTheta)*(rangefinder.r + compassr + compassGap);
+    var compassx = rangefinder.x - compassxdif;
+    graphics.drawCircle(compassx, compassy, compassr*2);
+    //These may look off center to you, but trust me, they are not - a vertical line through the compass will exactly bisect them
+    var text = game.add.text(compassx, compassy - compassr,  'N', { font: '14px Inconsolata', fill: '#ffffff'});
+    text.anchor.setTo(0.5, 0.5);
+    text.y += text.height;
+    text = game.add.text(text.x, text.y, '0°', { font: '12px Inconsolata', fill: '#ffffff'});
+    text.anchor.setTo(0.5, 0.5);
+    text.y += text.height*0.6;
+    graphics.drawCircle(compassx, compassy, 10);
+    graphics.moveTo(compassx, compassy - compassr);
+    graphics.lineTo(compassx, compassy + compassr);
 
     //Create player
     virtualPlayerMech = new VirtualPlayerMech(centerX, centerY);
